@@ -322,8 +322,32 @@ class MainController(QWidget):
                 self.setSecondNumber(empty=True)
                 
             elif button_value == 16:
-                # clear the calculation entry
-                self.ui.standard_calc_entry.setText("")
+                """ change the sing of the current number
+                    if the current number was positive it's will be preceded by a negative sign
+                    if the current number was negative it's will be preceded by a positive sign"""
+                
+                # get the current text number 
+                current_text = self.ui.standard_calc_entry.text()
+                
+                # get the first character
+                first_character = current_text[0]
+                print(first_character)
+                
+                # check the first character
+                if first_character == "+" or first_character != "-":
+                    # define the new negative number
+                    new_text = f"-{current_text}"
+                    
+                    # set the new number to the entry
+                    self.ui.standard_calc_entry.setText(new_text)
+                    
+                elif first_character == "-":
+                    # define the new positive number by removing the first character
+                    new_text = current_text[1:]
+                    new_text = f"{new_text}"
+                    
+                    # set the new number to the entry
+                    self.ui.standard_calc_entry.setText(new_text)
                 
                 # reset the second number
                 self.setSecondNumber(empty=True)
@@ -331,6 +355,8 @@ class MainController(QWidget):
                 self.setFirstNumber(empty=True)
                 
             elif button_value == 17:
+                """ remove the last character on the current text 
+                    define the function of the delete button """
                 # get the current text on the entry
                 current_text = self.ui.standard_calc_entry.text()
                 
