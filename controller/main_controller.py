@@ -32,6 +32,7 @@ class MainController(QWidget):
         return self._precedent_operator
     
     def setFirstNumber(self, value: float = 0.0, empty: bool =False) -> None:
+        print(f"first number {value}")
         if empty == True:
             self._first_entered_number = [0]
         else:
@@ -44,6 +45,7 @@ class MainController(QWidget):
         return self._second_entered_number[0]
 
     def setSecondNumber(self, value: float = 0.0, empty: bool =False) -> None:
+        print(f"second number {value}")
         if empty == True:
             self._second_entered_number = [0]
         else:
@@ -61,24 +63,40 @@ class MainController(QWidget):
         
         # manage operation
         if operator == "+":
-            self._result = f_number + s_number
+            if s_number < 0 and f_number >= 0:
+                self._result = (f_number) - abs(s_number)
+            elif f_number < 0 and s_number >= 0:
+                self._result = (s_number) - abs(f_number)
+            else:
+                self._result = (f_number) + (s_number)
         
         elif operator == "X":
-            self._result = f_number * s_number
+            self._result = (f_number) * (s_number)
         
         elif operator == "/":
-            self._result = f_number / s_number
+            if s_number == 0:
+                self._result = "Error"
+            else:
+                self._result = (f_number) / (s_number)
             
         elif operator == "-":
-            self._result = f_number - s_number
+            self._result = (f_number) - (s_number)
             
         print(f"the result as result func {self._result}")
         # set the result to the entry
-        self.ui.standard_calc_entry.setText(f"{round(self._result, 4)}")
+        # check if the result is a number or an error text
+        if isinstance(self._result, (int, float)):
+            self.ui.standard_calc_entry.setText(f"{round(self._result, 4)}")
+        else:
+            self.ui.standard_calc_entry.setText(f"{self._result}")
+        
         
 
-    def getResult(self) -> float | int:
-        return round(self._result, 4)
+    def getResult(self) -> float | int | str:
+        if isinstance(self._result, str):
+            return self._result
+        else:
+            return round(self._result, 4)
 
     def setEnteredNumber(self, number: float, operator:str = ""):
         # get the current value on the entry
@@ -221,6 +239,34 @@ class MainController(QWidget):
             self.setFirstNumber(empty=True)
         pass
     
+    def plusMinusBnt(self):
+        """ change the sing of the current number
+            if the current number was positive it's will be preceded by a negative sign
+            if the current number was negative it's will be preceded by a positive sign"""
+        
+        # get the current text number 
+        current_text = self.ui.standard_calc_entry.text()
+        
+        # get the first character
+        first_character = current_text[0]
+        print(first_character)
+        
+        # check the first character
+        if first_character == "+" or first_character != "-":
+            # define the new negative number
+            new_text = f"-{current_text}"
+            
+            # set the new number to the entry
+            self.ui.standard_calc_entry.setText(new_text)
+            
+        elif first_character == "-":
+            # define the new positive number by removing the first character
+            new_text = current_text[1:]
+            new_text = f"{new_text}"
+            
+            # set the new number to the entry
+            self.ui.standard_calc_entry.setText(new_text)
+    
     
 
     def defineData(self):
@@ -313,48 +359,11 @@ class MainController(QWidget):
             # place the preview current number in the first_number or second_number list
             self.setEnteredNumber(number=current_number,operator = self._used_operator)
             
-        elif button_value in range(15,19):
+        elif button_value in range(15,18):
             if button_value == 15:
-                # clear the calculation entry
-                self.ui.standard_calc_entry.setText("")
-                
-                # reset the second number
-                self.setSecondNumber(empty=True)
+                pass
                 
             elif button_value == 16:
-                """ change the sing of the current number
-                    if the current number was positive it's will be preceded by a negative sign
-                    if the current number was negative it's will be preceded by a positive sign"""
-                
-                # get the current text number 
-                current_text = self.ui.standard_calc_entry.text()
-                
-                # get the first character
-                first_character = current_text[0]
-                print(first_character)
-                
-                # check the first character
-                if first_character == "+" or first_character != "-":
-                    # define the new negative number
-                    new_text = f"-{current_text}"
-                    
-                    # set the new number to the entry
-                    self.ui.standard_calc_entry.setText(new_text)
-                    
-                elif first_character == "-":
-                    # define the new positive number by removing the first character
-                    new_text = current_text[1:]
-                    new_text = f"{new_text}"
-                    
-                    # set the new number to the entry
-                    self.ui.standard_calc_entry.setText(new_text)
-                
-                # reset the second number
-                self.setSecondNumber(empty=True)
-                # reset the first number
-                self.setFirstNumber(empty=True)
-                
-            elif button_value == 17:
                 """ remove the last character on the current text 
                     define the function of the delete button """
                 # get the current text on the entry
@@ -366,7 +375,7 @@ class MainController(QWidget):
                 # set the new text to the entry
                 self.ui.standard_calc_entry.setText(new_text) 
                 
-            elif button_value == 18:
+            elif button_value == 17:
                 """ put a point in the current number 
                     if the current number is empty set the initial number as 0 """
                     
@@ -436,12 +445,15 @@ class MainController(QWidget):
         
         self.ui.standard_btn_prcnt.clicked.connect(
             (lambda: self.completEntryByBtn(button=15)))
-        self.ui.standard_btn_plus_minus.clicked.connect(
-            (lambda: self.completEntryByBtn(button=16)))
         self.ui.standard_btn_delete.clicked.connect(
-            (lambda: self.completEntryByBtn(button=17)))
+            (lambda: self.completEntryByBtn(button=16)))
         self.ui.standard_btn_point.clicked.connect(
-            (lambda: self.completEntryByBtn(button=18)))
+            (lambda: self.completEntryByBtn(button=17)))
+        
+        # plus minus change button
+        
+        self.ui.standard_btn_plus_minus.clicked.connect(
+            (lambda: self.plusMinusBnt()))
         
         ###########################################
         # DEFINING ACTIONS FOR EXTRATS    BUTTONS #
