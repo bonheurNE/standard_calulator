@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>activity.svg</file>
+        <file>delete.svg</file>
+        <file>MANAS_ICON.png</file>
+    </qresource>
+</RCC>
