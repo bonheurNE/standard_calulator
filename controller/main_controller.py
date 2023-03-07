@@ -126,11 +126,20 @@ class MainController(QWidget):
                 # get the last  result
                 last_result = self.getResult()
                 
+                # get the current value on the edit
+                current_text = self.ui.standard_calc_entry.text()
+                
                 # assign this result value as the new value of the first_number
                 self.setFirstNumber(value=last_result, empty=False)
                 
                 self.setSecondNumber(empty=True)
                 
+                
+                # check if the current text is the some as the precedent value a clean the entry
+                if current_text == self.getFirstNumber():
+                    self.ui.standard_calc_entry.setText("")
+                else:
+                    pass
                 print("second 1 stage")
                 print(self.getFirstNumber())
                 print(self.getSecondNumber()) # always empty
@@ -242,7 +251,7 @@ class MainController(QWidget):
         elif button_value in range(10) and current_text != "0":
             print(f"first number {self.getFirstNumber()}")
             print(f"second number {self.getSecondNumber()}")
-            if current_text == str(self.getResult()) :
+            if current_text == str(self.getResult()):
                 self.ui.standard_calc_entry.setText("")
                 new_text = f"{button_value}"
             
