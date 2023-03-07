@@ -54,7 +54,22 @@ class MainController(QWidget):
         else:
             self._second_entered_number[0] = value
 
+    def setMemory(self, value:float=0.0, empty:bool=False) -> None:
+        if empty:self._memory = []
+        else:
+            if len(self._memory) != 0:
+                self._memory = []
+                self._memory.append(value)
     
+    def getMemory(self, id=None) -> float:
+        if id is None:
+            if len(self._memory) == 0:id = 0
+            else:
+                id = len(self._memory)-1
+        elif isinstance(id, int) and id < len(self._memory) :id = id
+        else:pass
+        
+        return self._memory[id] 
 
     def setResult(self, f_value: float = 0.0, s_value: float = 0.0, operator:str = "") -> None:
         #g get the first and sec ond number seted
@@ -282,11 +297,18 @@ class MainController(QWidget):
         # get the result value
         result_ = result
         
-        # create the temp text
-        text_ = f"{f_number} {p_operator} {s_number} = {result_}"
-        print(f"result {text_}")
-        # set the text to the temp label
-        self.ui.standard_temp_label.setText(text_)
+        
+        if s_number<0 and p_operator == "+":
+            text_ = f"{f_number} {s_number} = {result_}"
+            # set the text to the temp label
+            self.ui.standard_temp_label.setText(text_)
+        elif s_number<0 and p_operator != "+":
+            text_ = f"{f_number} {p_operator} ({s_number}) = {result_}"
+            # set the text to the temp label
+            self.ui.standard_temp_label.setText(text_)
+        #text_ = f"{f_number} {p_operator} {s_number} = {result_}"
+        #print(f"result {text_}")
+        
         #self.ui.standard_calc_entry.setText(f"{f_number}")
         
         
@@ -313,12 +335,19 @@ class MainController(QWidget):
             self.setFirstNumber(empty=True)
             
         elif button_value == "MC":
+            self.setMemory(empty=True)
             pass
         
         elif button_value == "MR":
+            self.ui.standard_calc_entry.setText("")
+            number = self.getMemory(id=0)
+            self.ui.standard_calc_entry.setText(str(number))
             pass
         
         elif button_value == "MS":
+            value_ = self.ui.standard_calc_entry.text()
+            value_ = float(value_)
+            self.setMemory(value=value_, empty=True)
             pass
         
         elif button_value == "M-":
@@ -382,6 +411,7 @@ class MainController(QWidget):
         self._used_operator = ""
         self._precedent_operator = ""
         self._history_file_path = ""
+        self._memory = []
          
         
         
