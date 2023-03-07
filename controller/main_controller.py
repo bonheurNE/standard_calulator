@@ -74,12 +74,11 @@ class MainController(QWidget):
             
         print(f"the result as result func {self._result}")
         # set the result to the entry
-        #self.ui.standard_calc_entry.setText("")
-        self.ui.standard_calc_entry.setText(f"{self._result}")
+        self.ui.standard_calc_entry.setText(f"{round(self._result, 4)}")
         
 
     def getResult(self) -> float | int:
-        return self._result
+        return round(self._result, 4)
 
     def setEnteredNumber(self, number: float, operator:str = ""):
         # get the current value on the entry
@@ -109,6 +108,9 @@ class MainController(QWidget):
             # use the f_number and the used operator to print  the temp "f_number used_operator"
             self.simpleTemp(first_number=self.getFirstNumber(), operator=self.getPrecedentOperator())
             
+            # clean the calculation entry
+            self.ui.standard_calc_entry.setText("")
+            
             
             
             
@@ -123,11 +125,12 @@ class MainController(QWidget):
             
             # manage the next stage by checking the used operator
             if used_operator in ["+","-","/","X"]:
+                
                 # get the last  result
                 last_result = self.getResult()
                 
                 # get the current value on the edit
-                current_text = self.ui.standard_calc_entry.text()
+                #current_text = self.ui.standard_calc_entry.text()
                 
                 # assign this result value as the new value of the first_number
                 self.setFirstNumber(value=last_result, empty=False)
@@ -135,11 +138,6 @@ class MainController(QWidget):
                 self.setSecondNumber(empty=True)
                 
                 
-                # check if the current text is the some as the precedent value a clean the entry
-                if current_text == self.getFirstNumber():
-                    self.ui.standard_calc_entry.setText("")
-                else:
-                    pass
                 print("second 1 stage")
                 print(self.getFirstNumber())
                 print(self.getSecondNumber()) # always empty
@@ -198,6 +196,30 @@ class MainController(QWidget):
         # set the text to the temp label
         self.ui.standard_temp_label.setText(text_)
         #self.ui.standard_calc_entry.setText(f"{f_number}")
+        
+        
+    def memoryButton(self, button:str="") -> None:
+        # get the text of the clicked button
+        button_value = button
+        if button_value == "CE":
+                # clear the calculation entry
+                self.ui.standard_calc_entry.setText("")
+                
+                # reset the second number
+                self.setSecondNumber(empty=True)
+                
+        elif button_value == "C":
+            # clear the calculation entry
+            self.ui.standard_calc_entry.setText("0")
+            
+            # clear the temp label
+            self.ui.standard_temp_label.setText("")
+            
+            # reset the second number
+            self.setSecondNumber(empty=True)
+            # reset the first number
+            self.setFirstNumber(empty=True)
+        pass
     
     
 
@@ -291,15 +313,53 @@ class MainController(QWidget):
             # place the preview current number in the first_number or second_number list
             self.setEnteredNumber(number=current_number,operator = self._used_operator)
             
-            # manage temp label
-            #self.setTempData()
-            
-            # initialize the entry
-            """ if self.getPrecedentOperator() != "=":
-                self.ui.standard_calc_entry.setText("0")
-            elif self.getPrecedentOperator() == "=":
-                self.ui.standard_calc_entry.setText("78")
-            """
+        elif button_value in range(15,19):
+            if button_value == 15:
+                # clear the calculation entry
+                self.ui.standard_calc_entry.setText("")
+                
+                # reset the second number
+                self.setSecondNumber(empty=True)
+                
+            elif button_value == 16:
+                # clear the calculation entry
+                self.ui.standard_calc_entry.setText("")
+                
+                # reset the second number
+                self.setSecondNumber(empty=True)
+                # reset the first number
+                self.setFirstNumber(empty=True)
+                
+            elif button_value == 17:
+                # get the current text on the entry
+                current_text = self.ui.standard_calc_entry.text()
+                
+                # remove the last number 
+                new_text = current_text[:-1]
+                
+                # set the new text to the entry
+                self.ui.standard_calc_entry.setText(new_text) 
+                
+            elif button_value == 18:
+                """ put a point in the current number 
+                    if the current number is empty set the initial number as 0 """
+                    
+                # get the current text on the entry
+                current_text = self.ui.standard_calc_entry.text()
+                
+                # check if the current number begin with a number different from 0
+                if current_text == "":
+                    self.ui.standard_calc_entry.setText("0.")
+                    
+                # check if there is a point in the current number do not add an other
+                elif "." in current_text:
+                    pass
+                 
+                else:
+                    new_text = f"{current_text}."
+                
+                    # set the new text to the entry
+                    self.ui.standard_calc_entry.setText(new_text) 
         pass
 
         
@@ -343,3 +403,28 @@ class MainController(QWidget):
             (lambda: self.completEntryByBtn(button=13)))
         self.ui.standard_btn_equal.clicked.connect(
             (lambda: self.completEntryByBtn(button=14)))
+        
+        #####################################################
+        # DEFINING ACTIONS FOR EXTRATS OPERATIONS   BUTTONS #
+        #####################################################
+        
+        self.ui.standard_btn_prcnt.clicked.connect(
+            (lambda: self.completEntryByBtn(button=15)))
+        self.ui.standard_btn_plus_minus.clicked.connect(
+            (lambda: self.completEntryByBtn(button=16)))
+        self.ui.standard_btn_delete.clicked.connect(
+            (lambda: self.completEntryByBtn(button=17)))
+        self.ui.standard_btn_point.clicked.connect(
+            (lambda: self.completEntryByBtn(button=18)))
+        
+        ###########################################
+        # DEFINING ACTIONS FOR EXTRATS    BUTTONS #
+        ###########################################
+        
+        self.ui.standard_btn_C.clicked.connect(lambda:self.memoryButton(button="C"))
+        self.ui.standard_btn_CE.clicked.connect(lambda:self.memoryButton(button="CE"))
+        self.ui.standard_btn_MC.clicked.connect(lambda:self.memoryButton(button="MC"))
+        self.ui.standard_btn_MR.clicked.connect(lambda:self.memoryButton(button="MR"))
+        self.ui.standard_btn_MS.clicked.connect(lambda:self.memoryButton(button="MS"))
+        self.ui.standard_btn_M_minus.clicked.connect(lambda:self.memoryButton(button="M-"))
+        self.ui.standard_btn_M_plus.clicked.connect(lambda:self.memoryButton(button="M+"))
