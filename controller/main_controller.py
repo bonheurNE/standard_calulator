@@ -4,15 +4,18 @@ from PySide6 import QtGui, QtCore
 from views.ui_standard import *
 from model import main_model
 
+import json
+
 
 class MainController(QWidget):
-    def __init__(self):
+    def __init__(self, tempDire):
         super().__init__()
         self.ui = Ui_standard_mode_widget()
         self.ui.setupUi(self)
 
         # define  data
         self.defineData()
+        self._temp_history_folder = tempDire
         
         # initialise data
         self.initialiseData()
@@ -97,6 +100,75 @@ class MainController(QWidget):
             return self._result
         else:
             return round(self._result, 4)
+        
+    def setHistoryNewData(self, data:tuple):
+        # define the initial data ID
+        ID = 0
+        
+        # define the data to add
+        data = f"{data[0]} {data[1]} {data[2]} = {data[3]}"
+        
+        # open the temp history file
+        with open(self._history_file_path, 'r') as f:
+            json_data = json.load(f)
+        
+        # get the size of json_data
+        json_data_size = len(json_data)
+        
+        # check if the file dict is empty to use the initial id or increment the id
+        if json_data_size == 0:
+            # if the file dict is empty set the initial id to 0
+            json_data[ID] = data
+        else:
+            # get the last ID in the data dict
+            last_id = list(json_data.keys())
+            last_id = max(last_id)
+            print(f"max id = {type(last_id)}")
+            # increment the ID 
+            last_id = int(last_id)+1
+            
+            json_data[last_id] = data
+        # write the new data to the json file
+        with open(self._history_file_path, 'w') as file_:
+            json.dump(json_data, file_, indent=4)
+            
+        print(json_data)
+    
+    def getHistoryData(self, data_id:int = 0) -> None:
+        # open the history temp json file to get the json data
+        with open( self._history_file_path, 'r') as f:
+            json_data = json.load(f)
+        
+        # look for the data of the specific id
+        data_id = str(data_id)
+        data = json_data[data_id]
+        
+        
+        # separate data by = sign
+        data_ = data.split('=')
+        
+        data__ = data_[0]
+        # separate data by + sign
+        if '+' in data_[0]:
+            data__ = data__.split('+')
+            operator = '+'
+        elif '-' in data_[0]:
+            data__ = data__.split('-')
+            operator = '-'
+        elif 'X' in data_[0]:
+            data__ = data__.split('X')
+            operator = 'X'
+        elif '/' in data_[0]:
+            data__ = data__.split('/')
+            operator = '/'
+        
+        # assign the first, second, result they specific numbers
+        self.setFirstNumber(value=float(data__[0]))
+        self.setSecondNumber(value=float(data__[0]))
+        self.setResult(f_value=float(data__[0]), s_value=float(data__[1]),operator=operator)
+        
+        # complete the temp
+        self.completTemp(f_number=self.getFirstNumber(), s_number=self.getSecondNumber(), precedent_operator=operator, result= self.getResult())
 
     def setEnteredNumber(self, number: float, operator:str = ""):
         # get the current value on the entry
@@ -141,6 +213,8 @@ class MainController(QWidget):
             # calculate the result ,set the result to the result variable and print the result 
             self.setResult(f_value=self.getFirstNumber(), s_value=self.getSecondNumber(), operator=self.getPrecedentOperator())
             
+            # add to history
+            self.setHistoryNewData((self.getFirstNumber(),self.getPrecedentOperator(),self.getSecondNumber(),self.getResult()))
             # manage the next stage by checking the used operator
             if used_operator in ["+","-","/","X"]:
                 
@@ -237,6 +311,21 @@ class MainController(QWidget):
             self.setSecondNumber(empty=True)
             # reset the first number
             self.setFirstNumber(empty=True)
+            
+        elif button_value == "MC":
+            pass
+        
+        elif button_value == "MR":
+            pass
+        
+        elif button_value == "MS":
+            pass
+        
+        elif button_value == "M-":
+            pass
+        
+        elif button_value == "M+":
+            pass
         pass
     
     def plusMinusBnt(self):
@@ -267,7 +356,16 @@ class MainController(QWidget):
             # set the new number to the entry
             self.ui.standard_calc_entry.setText(new_text)
     
-    
+    def _createHistoryFile(self):
+        sample = {}
+        
+        # create the file named history.json on the directory model
+        self._history_file_path = self._temp_history_folder +"/history.json"
+        
+        with open(self._history_file_path, 'w') as f:
+            json.dump(sample, f, indent=4) 
+        
+        print("history file created created")
 
     def defineData(self):
         """ initializing all data we will need to use 
@@ -283,7 +381,9 @@ class MainController(QWidget):
         self._result = 0.0
         self._used_operator = ""
         self._precedent_operator = ""
-        self._temp_operation = ""
+        self._history_file_path = ""
+         
+        
         
         pass
     
@@ -291,6 +391,9 @@ class MainController(QWidget):
         
         self.setFirstNumber(empty=True)
         self.setSecondNumber(empty=True)
+        
+        # create and initialize the history json file
+        self._createHistoryFile()
         
         pass
         
