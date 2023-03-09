@@ -26,6 +26,9 @@ class MainController(QWidget):
         # setup calculation buttons actions
         self.calculationBtnsAction()
         
+        # manage key event action
+        #self.keyPressEvent()
+        
     def setPrecedentOperator(self, operator:str = ""):
         self._precedent_operator = operator
         #self.ui.standard_calc_entry.setText("0")
@@ -722,4 +725,56 @@ class MainController(QWidget):
         self.ui.standard_btn_MS.clicked.connect(lambda:self.memoryButton(button="MS"))
         self.ui.standard_btn_M_minus.clicked.connect(lambda:self.memoryButton(button="M-"))
         self.ui.standard_btn_M_plus.clicked.connect(lambda:self.memoryButton(button="M+"))
+        
+        
+    ########################
+    # MANAGING KEYS EVENTS #
+    ########################
+    
+    def keyPressEvent(self, event):
+        _entry = self.ui.standard_calc_entry.text()
+        if len(_entry) == 1 and _entry == "0":
+            _entry = ""
+      
+        if event.key() == Qt.Key.Key_0:
+            self.ui.standard_calc_entry.setText(f"{_entry}0")
+        elif event.key() == Qt.Key.Key_1:
+            self.ui.standard_calc_entry.setText(f"{_entry}1")
+        elif event.key() == Qt.Key.Key_2:
+            self.ui.standard_calc_entry.setText(f"{_entry}2")
+        elif event.key() == Qt.Key.Key_3:
+            self.ui.standard_calc_entry.setText(f"{_entry}3")
+        elif event.key() == Qt.Key.Key_4:
+            self.ui.standard_calc_entry.setText(f"{_entry}4")
+        elif event.key() == Qt.Key.Key_5:
+            self.ui.standard_calc_entry.setText(f"{_entry}5")
+        elif event.key() == Qt.Key.Key_6:
+            self.ui.standard_calc_entry.setText(f"{_entry}6")
+        elif event.key() == Qt.Key.Key_7:
+            self.ui.standard_calc_entry.setText(f"{_entry}7")
+        elif event.key() == Qt.Key.Key_8:
+            self.ui.standard_calc_entry.setText(f"{_entry}8")
+        elif event.key() == Qt.Key.Key_9:
+            self.ui.standard_calc_entry.setText(f"{_entry}9")
+            
+        elif event.key() == Qt.Key.Key_Plus:
+            self.completEntryByBtn(button=10)
+        elif event.key() == Qt.Key.Key_Minus:
+            self.completEntryByBtn(button=11)
+        elif event.key() == Qt.Key.Key_division:
+            self.completEntryByBtn(button=12)
+        elif event.key() == Qt.Key.Key_multiply:
+            self.completEntryByBtn(button=13)
+        elif event.key() == Qt.Key.Key_Percent:
+            self.completEntryByBtn(button=15)
+        elif event.key() == Qt.Key.Key_Period:
+            self.completEntryByBtn(button=17)
+        elif event.key() == Qt.Key.Key_Backspace:
+            self.completEntryByBtn(button=16)
+            
+        elif event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Equal:
+            print("equal action")
+            self.completEntryByBtn(button=14)
+            #self.ui.standard_calc_entry.setText(f"{_entry}9")
+            
         
