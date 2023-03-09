@@ -494,6 +494,23 @@ class MainController(QWidget):
             
         elif button_value in range(15,18):
             if button_value == 15:
+                """ manage action for the % button """
+                
+                # get the current value on the input field
+                current_text = self.ui.standard_calc_entry.text()
+                
+                if current_text.isalpha():
+                    self.ui.standard_calc_entry.setText("Invalid Operation")
+                else:
+                    current_number = float(current_text)
+                    
+                    prcnt_number = current_number/100
+                    prcnt_number = round(prcnt_number, 4)
+                    
+                    # set the new calculated value to the entry
+                    new_text = f"{prcnt_number}"
+                    
+                    self.ui.standard_calc_entry.setText(new_text)
                 pass
                 
             elif button_value == 16:
