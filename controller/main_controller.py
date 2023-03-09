@@ -5,7 +5,7 @@ from views.ui_standard import *
 from model import main_model
 
 import json
-
+import re
 
 class MainController(QWidget):
     def __init__(self, tempDire):
@@ -55,21 +55,32 @@ class MainController(QWidget):
             self._second_entered_number[0] = value
 
     def setMemory(self, value:float=0.0, empty:bool=False) -> None:
-        if empty:self._memory = []
+        if empty == True:
+            self._memory = []
+            print("memory empty")
         else:
-            if len(self._memory) != 0:
-                self._memory = []
-                self._memory.append(value)
+            #if len(self._memory) != 0:
+            self._memory = []
+            self._memory.append(value)
+            print(f"new value one memory {self._memory} ")
     
     def getMemory(self, id=None) -> float:
         if id is None:
-            if len(self._memory) == 0:id = 0
+            if len(self._memory) == 0:
+                id = 0
+                print(self._memory[id] )
+                return self._memory[id] 
             else:
+                # get the last element of the memory list
                 id = len(self._memory)-1
-        elif isinstance(id, int) and id < len(self._memory) :id = id
-        else:pass
-        
-        return self._memory[id] 
+                print(self._memory[id] )
+                return self._memory[id] 
+        elif isinstance(id, int) and id < len(self._memory) :
+            id = id
+            print(self._memory[id] )
+            return self._memory[id] 
+        else:
+            pass
 
     def setResult(self, f_value: float = 0.0, s_value: float = 0.0, operator:str = "") -> None:
         #g get the first and sec ond number seted
@@ -80,35 +91,37 @@ class MainController(QWidget):
         operator = operator
         
         # manage operation
-        if operator == "+":
-            if s_number < 0 and f_number >= 0:
-                self._result = (f_number) - abs(s_number)
-            elif f_number < 0 and s_number >= 0:
-                self._result = (s_number) - abs(f_number)
-            else:
-                self._result = (f_number) + (s_number)
-        
-        elif operator == "X":
-            self._result = (f_number) * (s_number)
-        
-        elif operator == "/":
-            if s_number == 0:
-                self._result = "Error"
-            else:
-                self._result = (f_number) / (s_number)
+        try:
+            if operator == "+":
+                if s_number < 0 and f_number >= 0:
+                    self._result = (f_number) - abs(s_number)
+                elif f_number < 0 and s_number >= 0:
+                    self._result = (s_number) - abs(f_number)
+                else:
+                    self._result = (f_number) + (s_number)
             
-        elif operator == "-":
-            self._result = (f_number) - (s_number)
+            elif operator == "X":
+                self._result = (f_number) * (s_number)
             
-        print(f"the result as result func {self._result}")
-        # set the result to the entry
-        # check if the result is a number or an error text
-        if isinstance(self._result, (int, float)):
-            self.ui.standard_calc_entry.setText(f"{round(self._result, 4)}")
-        else:
-            self.ui.standard_calc_entry.setText(f"{self._result}")
-        
-        
+            elif operator == "/":
+                if s_number == 0:
+                    self._result = "Error"
+                else:
+                    self._result = (f_number) / (s_number)
+                
+            elif operator == "-":
+                self._result = (f_number) - (s_number)
+                
+            print(f"the result as result func {self._result}")
+            # set the result to the entry
+            # check if the result is a number or an error text
+            if isinstance(self._result, (int, float)):
+                self.ui.standard_calc_entry.setText(f"{round(self._result, 4)}")
+            else:
+                self.ui.standard_calc_entry.setText(f"{self._result}")
+        except ValueError:
+            self.ui.standard_calc_entry.setText("Invalid Value")
+            self.ui.standard_temp_label.setText("")
 
     def getResult(self) -> float | int | str:
         if isinstance(self._result, str):
@@ -282,9 +295,15 @@ class MainController(QWidget):
     def simpleTemp(self, first_number:float = 0,operator:str = "") -> None:
         text_ = f"{first_number} {operator}"
         
-        # set the temp operator as the temp entry data
-        self.ui.standard_temp_label.setText(text_)
-        
+        if operator == "=" and first_number == 0:
+            self.ui.standard_calc_entry.setText("0")
+            self.ui.standard_temp_label.setText("")
+            
+            self.setFirstNumber(empty=True)
+        else:
+            # set the temp operator as the temp entry data
+            self.ui.standard_temp_label.setText(text_)
+            print("in simple temp")
         #self.ui.standard_calc_entry.setText(f"{first_number}")
         pass
     
@@ -297,8 +316,10 @@ class MainController(QWidget):
         # get the result value
         result_ = result
         
+        print("in complet temp label")
         
-        if s_number<0 and p_operator == "+":
+        
+        if s_number< 0 and p_operator == "+":
             text_ = f"{f_number} {s_number} = {result_}"
             # set the text to the temp label
             self.ui.standard_temp_label.setText(text_)
@@ -306,10 +327,14 @@ class MainController(QWidget):
             text_ = f"{f_number} {p_operator} ({s_number}) = {result_}"
             # set the text to the temp label
             self.ui.standard_temp_label.setText(text_)
-        #text_ = f"{f_number} {p_operator} {s_number} = {result_}"
-        #print(f"result {text_}")
+        elif s_number>=0 and p_operator in  ["+","-","X","/"]:
+            text_ = f"{f_number} {p_operator} {s_number} = "
+            self.ui.standard_temp_label.setText(text_)
+            self.ui.standard_calc_entry.setText(f"{result_}")
+        elif s_number>=0 and p_operator not in  ["+","-","X","/"]:
+            self.ui.standard_temp_label.setText("")
+            self.ui.standard_calc_entry.setText(f"0")
         
-        #self.ui.standard_calc_entry.setText(f"{f_number}")
         
         
     def memoryButton(self, button:str="") -> None:
@@ -336,6 +361,7 @@ class MainController(QWidget):
             
         elif button_value == "MC":
             self.setMemory(empty=True)
+            self.ui.standard_calc_entry.setText("0")
             pass
         
         elif button_value == "MR":
@@ -346,16 +372,75 @@ class MainController(QWidget):
         
         elif button_value == "MS":
             value_ = self.ui.standard_calc_entry.text()
-            value_ = float(value_)
-            self.setMemory(value=value_, empty=True)
+            if value_.isdigit() or self.is_float(value_):
+                value_ = float(value_)
+                self.setMemory(value=value_, empty=False)
+            else:pass
+            
             pass
         
         elif button_value == "M-":
-            pass
+            number = self.getMemory(id=0)
+            
+            # get the current number on the entry
+            current_text = self.ui.standard_calc_entry.text()
+            try:
+                if current_text.isdigit() or self.is_float(current_text):
+                    substract_number = float(current_text)
+                    
+                    if number == substract_number:
+                        new_number = number - 1
+                        self.setMemory(value=new_number)
+                        # show the new number
+                        self.ui.standard_calc_entry.setText(f"{new_number}")
+                    else:
+                        new_number = number - (substract_number)
+                        self.setMemory(value=new_number)
+                        
+                        # show the new number
+                        self.ui.standard_calc_entry.setText(f"{new_number}")
+                elif current_text == "":
+                    new_number = number - 1
+                    self.setMemory(value=new_number)
+                    
+                    # show the new number
+                    self.ui.standard_calc_entry.setText(f"{new_number}")
+                else:
+                    # clear the entry
+                    self.ui.standard_calc_entry.setText("0")
+                    pass
+            except TypeError:
+                pass
+            
         
         elif button_value == "M+":
-            pass
-        pass
+            number = self.getMemory(id=0)
+            
+            # get the current number on the entry
+            current_text = self.ui.standard_calc_entry.text()
+            try:
+                if current_text.isdigit() or self.is_float(current_text):
+                    additionnal_number = float(current_text)
+                    
+                    new_number = number + (additionnal_number)
+                    self.setMemory(value=new_number)
+                    
+                    # show the new number
+                    self.ui.standard_calc_entry.setText(f"{new_number}")
+                elif current_text == "":
+                    new_number = number + 1
+                    self.setMemory(value=new_number)
+                    
+                    # show the new number
+                    self.ui.standard_calc_entry.setText(f"{new_number}")
+                else:
+                    # clear the entry
+                    self.ui.standard_calc_entry.setText("0")
+                    pass
+                pass
+            except TypeError:
+                pass
+        
     
     def plusMinusBnt(self):
         """ change the sing of the current number
@@ -395,6 +480,8 @@ class MainController(QWidget):
             json.dump(sample, f, indent=4) 
         
         print("history file created created")
+        
+    
 
     def defineData(self):
         """ initializing all data we will need to use 
@@ -427,6 +514,10 @@ class MainController(QWidget):
         
         pass
         
+    def has_alphabets_and_numbers(self,string:str):
+        pattern = r"(?=.*[a-zA-Z])(?=.*\d)"
+        return bool(re.match(pattern, string))
+        
     def setUpWidget(self):
         # removing window title bar
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
@@ -441,15 +532,18 @@ class MainController(QWidget):
         
         # get the current text on the text entry 
         current_text = self.ui.standard_calc_entry.text()
+        current_text = current_text.strip()
         
-        if button_value in range(10) and current_text == "0":
+        if button_value in range(10) and current_text == "0" or current_text.isalpha():
             self.ui.standard_calc_entry.setText("")
             
             new_text = f"{button_value}"
             
             self.ui.standard_calc_entry.setText(new_text)
+        
+        
             
-        elif button_value in range(10) and current_text != "0":
+        elif button_value in range(10) and current_text != "0" :
             print(f"first number {self.getFirstNumber()}")
             print(f"second number {self.getSecondNumber()}")
             if current_text == str(self.getResult()):
@@ -457,6 +551,11 @@ class MainController(QWidget):
                 new_text = f"{button_value}"
             
                 # set updated data to the entry
+                self.ui.standard_calc_entry.setText(new_text)
+                
+            elif self.has_alphabets_and_numbers(current_text):
+                new_text = f"{button_value}"
+                
                 self.ui.standard_calc_entry.setText(new_text)
             
             else:
@@ -468,9 +567,14 @@ class MainController(QWidget):
             
             
         elif button_value in range(10,15) :
-            # manage current entry data getUp
-            current_number = float(current_text)
             
+            # manage current entry data getUp
+            #current_number = float(current_text)
+            
+            if current_text.isdigit() or self.is_float(current_text) and len(current_text) !=0:
+                current_number = float(current_text)
+            else:
+                current_number = 0
             
             # define the used operator
             if button_value == 10:
@@ -487,6 +591,26 @@ class MainController(QWidget):
                 
             elif button_value == 14:
                 self._used_operator = "="
+                try:
+                    # get the current text on the text entry 
+                    print(f"current text {current_text}")
+                    # first check the current text entered
+                    if current_text.isalpha():
+                        self.ui.standard_calc_entry.setText("0")
+                        self.ui.standard_temp_label.setText("")
+                        current_number = 0
+                    elif current_text == "":
+                        self.ui.standard_calc_entry.setText("0")
+                        self.ui.standard_temp_label.setText("")
+                        current_number = 0
+                    elif current_text == "0" or current_text == "0.0":
+                        self.ui.standard_calc_entry.setText("0")
+                        self.ui.standard_temp_label.setText("")
+                        current_number = 0
+                except ValueError:
+                    self.ui.standard_calc_entry.setText("0")
+                    self.ui.standard_temp_label.setText("")
+                    current_number = 0
                 
             # manage settingUp of numbers 
             # place the preview current number in the first_number or second_number list
@@ -548,6 +672,13 @@ class MainController(QWidget):
         pass
 
         
+    def is_float(self, input_string):
+        try:
+            float(input_string)
+            return True
+        except ValueError:
+            return False
+
     def calculationBtnsAction(self):
         ################################
         # DEFINING BUTTONS     ACTIONs #
@@ -616,3 +747,4 @@ class MainController(QWidget):
         self.ui.standard_btn_MS.clicked.connect(lambda:self.memoryButton(button="MS"))
         self.ui.standard_btn_M_minus.clicked.connect(lambda:self.memoryButton(button="M-"))
         self.ui.standard_btn_M_plus.clicked.connect(lambda:self.memoryButton(button="M+"))
+        
