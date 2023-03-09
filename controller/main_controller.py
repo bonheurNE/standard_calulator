@@ -35,7 +35,7 @@ class MainController(QWidget):
         return self._precedent_operator
     
     def setFirstNumber(self, value: float = 0.0, empty: bool =False) -> None:
-        print(f"first number {value}")
+        
         if empty == True:
             self._first_entered_number = [0]
         else:
@@ -48,7 +48,7 @@ class MainController(QWidget):
         return self._second_entered_number[0]
 
     def setSecondNumber(self, value: float = 0.0, empty: bool =False) -> None:
-        print(f"second number {value}")
+        
         if empty == True:
             self._second_entered_number = [0]
         else:
@@ -57,27 +57,24 @@ class MainController(QWidget):
     def setMemory(self, value:float=0.0, empty:bool=False) -> None:
         if empty == True:
             self._memory = []
-            print("memory empty")
+            
         else:
             #if len(self._memory) != 0:
             self._memory = []
             self._memory.append(value)
-            print(f"new value one memory {self._memory} ")
+            
     
     def getMemory(self, id=None) -> float:
         if id is None:
             if len(self._memory) == 0:
                 id = 0
-                print(self._memory[id] )
                 return self._memory[id] 
             else:
                 # get the last element of the memory list
                 id = len(self._memory)-1
-                print(self._memory[id] )
                 return self._memory[id] 
         elif isinstance(id, int) and id < len(self._memory) :
             id = id
-            print(self._memory[id] )
             return self._memory[id] 
         else:
             pass
@@ -112,7 +109,7 @@ class MainController(QWidget):
             elif operator == "-":
                 self._result = (f_number) - (s_number)
                 
-            print(f"the result as result func {self._result}")
+            
             # set the result to the entry
             # check if the result is a number or an error text
             if isinstance(self._result, (int, float)):
@@ -151,7 +148,6 @@ class MainController(QWidget):
             # get the last ID in the data dict
             last_id = list(json_data.keys())
             last_id = max(last_id)
-            print(f"max id = {type(last_id)}")
             # increment the ID 
             last_id = int(last_id)+1
             
@@ -159,8 +155,7 @@ class MainController(QWidget):
         # write the new data to the json file
         with open(self._history_file_path, 'w') as file_:
             json.dump(json_data, file_, indent=4)
-            
-        print(json_data)
+         
     
     def getHistoryData(self, data_id:int = 0) -> None:
         # open the history temp json file to get the json data
@@ -206,9 +201,6 @@ class MainController(QWidget):
         used_operator = operator
         
         # MANAGE NUMBERS LOCATIONS
-        print("precedent stage")
-        print(self.getFirstNumber())
-        print(self.getSecondNumber())
 
         if self.getFirstNumber() == 0 and self.getSecondNumber() == 0:
             
@@ -219,9 +211,6 @@ class MainController(QWidget):
             # assign the used operator to the precedent operator variable
             self.setPrecedentOperator(operator=used_operator)
             
-            print("first stage")
-            print(self.getFirstNumber())
-            print(self.getSecondNumber())
             
             # use the f_number and the used operator to print  the temp "f_number used_operator"
             self.simpleTemp(first_number=self.getFirstNumber(), operator=self.getPrecedentOperator())
@@ -233,7 +222,7 @@ class MainController(QWidget):
             
             
         elif self.getFirstNumber() != 0 and self.getSecondNumber() == 0:
-            print("second case")
+            
             
             # assign the current number to the second number variable
             self.setSecondNumber(value=number, empty=False)
@@ -256,11 +245,7 @@ class MainController(QWidget):
                 self.setFirstNumber(value=last_result, empty=False)
                 
                 self.setSecondNumber(empty=True)
-                
-                
-                print("second 1 stage")
-                print(self.getFirstNumber())
-                print(self.getSecondNumber()) # always empty
+                # always empty
                 
                 # assign the used operator as the new value of the precedent used operator variable
                 self.setPrecedentOperator(operator=used_operator)
@@ -272,9 +257,6 @@ class MainController(QWidget):
                 # print the comlete temp like : "f_number operator s_second = result"
                 self.completTemp(f_number = self.getFirstNumber(), s_number=self.getSecondNumber(), precedent_operator=self.getPrecedentOperator(), result=self.getResult())
                  
-                print("second 2 stage")
-                print(self.getFirstNumber())
-                print(self.getSecondNumber())
                 # initialize all the two variables
                 self.setFirstNumber(empty=True)
                 self.setSecondNumber(empty=True)
@@ -303,7 +285,7 @@ class MainController(QWidget):
         else:
             # set the temp operator as the temp entry data
             self.ui.standard_temp_label.setText(text_)
-            print("in simple temp")
+            
         #self.ui.standard_calc_entry.setText(f"{first_number}")
         pass
     
@@ -315,8 +297,6 @@ class MainController(QWidget):
         
         # get the result value
         result_ = result
-        
-        print("in complet temp label")
         
         
         if s_number< 0 and p_operator == "+":
@@ -452,7 +432,6 @@ class MainController(QWidget):
         
         # get the first character
         first_character = current_text[0]
-        print(first_character)
         
         # check the first character
         if first_character == "+" or first_character != "-":
@@ -479,7 +458,6 @@ class MainController(QWidget):
         with open(self._history_file_path, 'w') as f:
             json.dump(sample, f, indent=4) 
         
-        print("history file created created")
         
     
 
@@ -544,8 +522,6 @@ class MainController(QWidget):
         
             
         elif button_value in range(10) and current_text != "0" :
-            print(f"first number {self.getFirstNumber()}")
-            print(f"second number {self.getSecondNumber()}")
             if current_text == str(self.getResult()):
                 self.ui.standard_calc_entry.setText("")
                 new_text = f"{button_value}"
@@ -592,8 +568,7 @@ class MainController(QWidget):
             elif button_value == 14:
                 self._used_operator = "="
                 try:
-                    # get the current text on the text entry 
-                    print(f"current text {current_text}")
+                    
                     # first check the current text entered
                     if current_text.isalpha():
                         self.ui.standard_calc_entry.setText("0")

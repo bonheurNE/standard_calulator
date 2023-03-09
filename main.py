@@ -11,3 +11,5 @@ if __name__ == '__main__':
         controller = MainController(tempdir)
         controller.show()
         app.exec()
+        
+        
