@@ -1,6 +1,8 @@
 from PySide6.QtWidgets import QApplication, QWidget, QMessageBox
 from PySide6 import QtGui, QtCore
 
+from PySide6.QtGui import QDoubleValidator
+
 from views.ui_standard import *
 from model import main_model
 
@@ -82,13 +84,13 @@ class MainController(QWidget):
         else:
             pass
 
-    def setResult(self, f_value: float = 0.0, s_value: float = 0.0, operator:str = "") -> None:
+    def setResult(self) -> None:
         #g get the first and sec ond number seted
-        f_number = f_value
-        s_number = s_value
+        f_number = self.getFirstNumber()
+        s_number = self.getSecondNumber()
         
         # get used operator
-        operator = operator
+        operator = self.getPrecedentOperator()
         
         # manage operation
         try:
@@ -111,12 +113,13 @@ class MainController(QWidget):
                 
             elif operator == "-":
                 self._result = (f_number) - (s_number)
-                
+            
             
             # set the result to the entry
             # check if the result is a number or an error text
             if isinstance(self._result, (int, float)):
                 self.ui.standard_calc_entry.setText(f"{round(self._result, 4)}")
+                self._preview_answer = round(self._result, 4)
             else:
                 self.ui.standard_calc_entry.setText(f"{self._result}")
         except ValueError:
@@ -208,73 +211,96 @@ class MainController(QWidget):
         if self.getFirstNumber() == 0 and self.getSecondNumber() == 0:
             
             """"if first number and second numbers are both empty """
-            # assign the current number to the first number variable
-            self.setFirstNumber(value=current_number, empty=False)
+            
             
             # assign the used operator to the precedent operator variable
-            self.setPrecedentOperator(operator=used_operator)
-            
-            
-            # use the f_number and the used operator to print  the temp "f_number used_operator"
-            self.simpleTemp(first_number=self.getFirstNumber(), operator=self.getPrecedentOperator())
-            
-            # clean the calculation entry
-            self.ui.standard_calc_entry.setText("")
+            if used_operator == "=":
+                pass
+            if used_operator == "%":
+                pass
+            else:
+                # assign the current number to the first number variable
+                self.setFirstNumber(value=current_number, empty=False)
+                self.setPrecedentOperator(operator=used_operator)
+                # use the f_number and the used operator to print  the temp "f_number used_operator"
+                self.simpleTemp(first_number=self.getFirstNumber(), operator=self.getPrecedentOperator())
+                
+                # clean the calculation entry
+                self.ui.standard_calc_entry.setText("")
             
             
             
             
         elif self.getFirstNumber() != 0 and self.getSecondNumber() == 0:
-            
+            prcnt_op = ""
+            if used_operator == "%":
+                prcnt_op = "%"
+                prcnt_number_ = current_number/100
+                number_ = round(prcnt_number_, 4)
+                first_n_ = self.getFirstNumber()
+                number_ = number_*first_n_
+                number_ = round(number_, 4)
+                used_operator = self.getPrecedentOperator()
+            else:
+                number_ = current_number
+                used_operator = used_operator
             
             # assign the current number to the second number variable
-            self.setSecondNumber(value=number, empty=False)
+            self.setSecondNumber(value=number_, empty=False)
             
             # calculate the result ,set the result to the result variable and print the result 
-            self.setResult(f_value=self.getFirstNumber(), s_value=self.getSecondNumber(), operator=self.getPrecedentOperator())
+            self.setResult()
             
             # add to history
             self.setHistoryNewData((self.getFirstNumber(),self.getPrecedentOperator(),self.getSecondNumber(),self.getResult()))
-            # manage the next stage by checking the used operator
-            if used_operator in ["+","-","/","X"]:
+            if prcnt_op == "":
+                # manage the next stage by checking the used operator
+                if used_operator in ["+","-","/","X"]:
+                    
+                    # get the last  result
+                    last_result = self._preview_answer
+                    
+                    # get the current value on the edit
+                    #current_text = self.ui.standard_calc_entry.text()
+                    
+                    # assign this result value as the new value of the first_number
+                    self.setFirstNumber(value=last_result, empty=False)
+                    
+                    self.setSecondNumber(empty=True)
+                    # always empty
+                    
+                    # assign the used operator as the new value of the precedent used operator variable
+                    self.setPrecedentOperator(operator=used_operator)
+                    
+                    # use the new f_number and the  new used operator to print  the temp "f_number used_operator"
+                    self.simpleTemp(first_number=self.getFirstNumber(), operator=self.getPrecedentOperator())
                 
-                # get the last  result
-                last_result = self.getResult()
-                
-                # get the current value on the edit
-                #current_text = self.ui.standard_calc_entry.text()
-                
-                # assign this result value as the new value of the first_number
-                self.setFirstNumber(value=last_result, empty=False)
-                
-                self.setSecondNumber(empty=True)
-                # always empty
-                
-                # assign the used operator as the new value of the precedent used operator variable
-                self.setPrecedentOperator(operator=used_operator)
-                
-                # use the new f_number and the  new used operator to print  the temp "f_number used_operator"
-                self.simpleTemp(first_number=self.getFirstNumber(), operator=self.getPrecedentOperator())
-            
-            elif used_operator == "=":
+                elif used_operator == "=" :
+                    # print the comlete temp like : "f_number operator s_second = result"
+                    self.completTemp(f_number = self.getFirstNumber(), s_number=self.getSecondNumber(), precedent_operator=self.getPrecedentOperator(), result=self.getResult())
+                    
+                    # initialize all the two variables
+                    self.setFirstNumber(empty=True)
+                    self.setSecondNumber(empty=True)
+                    
+                    self.result_ = 0.0
+                    self._used_operator = ""
+                    self._precedent_operator = ""
+                    self._precedent_operator = ""
+                    #self._preview_answer = 0.0
+            elif prcnt_op == "%":
                 # print the comlete temp like : "f_number operator s_second = result"
                 self.completTemp(f_number = self.getFirstNumber(), s_number=self.getSecondNumber(), precedent_operator=self.getPrecedentOperator(), result=self.getResult())
-                 
+                
                 # initialize all the two variables
                 self.setFirstNumber(empty=True)
                 self.setSecondNumber(empty=True)
+                
                 self.result_ = 0.0
                 self._used_operator = ""
                 self._precedent_operator = ""
                 self._precedent_operator = ""
-
-        """ elif len(self._first_entered_number) != 0 and len(self._second_entered_number) != 0:
-            # set the result
-            self.setResult(self.getFirstNumber(), self.getSecondNumber())
-            # initialize all the two variables
-            self.setFirstNumber(empty=True)
-            self.setSecondNumber(empty=True) """
-            
+                #self._preview_answer = 0.0
         pass
     
     def simpleTemp(self, first_number:float = 0,operator:str = "") -> None:
@@ -480,6 +506,8 @@ class MainController(QWidget):
         self._precedent_operator = ""
         self._history_file_path = ""
         self._memory = []
+        
+        self._preview_answer = 0.0
          
         
         
@@ -504,6 +532,19 @@ class MainController(QWidget):
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         
         self.ui.standard_calc_entry.setText("0")
+        
+        # set validator
+        validator = QDoubleValidator()
+        self.ui.standard_calc_entry.setValidator(validator)
+        
+        # set the entry to be readonly
+        self.ui.standard_calc_entry.setReadOnly(True)
+        
+        # set the text to be align at right
+        self.ui.standard_calc_entry.setAlignment(Qt.AlignRight)
+        
+        # set the default place holder
+        self.ui.standard_calc_entry.setPlaceholderText("0")
         pass
     
     def completEntryByBtn(self, button:int):
@@ -514,44 +555,43 @@ class MainController(QWidget):
         # get the current text on the text entry 
         current_text = self.ui.standard_calc_entry.text()
         current_text = current_text.strip()
-        
-        if button_value in range(10) and current_text == "0" or current_text.isalpha():
-            self.ui.standard_calc_entry.setText("")
-            
-            new_text = f"{button_value}"
-            
-            self.ui.standard_calc_entry.setText(new_text)
-        
-        
-            
-        elif button_value in range(10) and current_text != "0" :
-            if current_text == str(self.getResult()):
+        if button_value in range(10):
+            if current_text == "0" or current_text.isalpha(): 
                 self.ui.standard_calc_entry.setText("")
-                new_text = f"{button_value}"
-            
-                # set updated data to the entry
-                self.ui.standard_calc_entry.setText(new_text)
                 
-            elif self.has_alphabets_and_numbers(current_text):
                 new_text = f"{button_value}"
                 
                 self.ui.standard_calc_entry.setText(new_text)
+            elif current_text == str(self._preview_answer):
+                    new_text = f"{button_value}"
+                
+                    # set updated data to the entry
+                    self.ui.standard_calc_entry.setText(new_text)
+            elif current_text != "0" :
+                if self.has_alphabets_and_numbers(current_text):
+                    new_text = f"{button_value}"
+                    
+                    self.ui.standard_calc_entry.setText(new_text)
+                
+                else:
+                    new_text = f"{current_text}{button_value}"
+                
+                    # set updated data to the entry
+                    self.ui.standard_calc_entry.setText(new_text)
+                
             
-            else:
-            
-                new_text = f"{current_text}{button_value}"
-            
-                # set updated data to the entry
-                self.ui.standard_calc_entry.setText(new_text)
-            
-            
-        elif button_value in range(10,15) :
-            
+        elif button_value in range(10,15):
+            # get the current text on the text entry 
+            current_text = self.ui.standard_calc_entry.text()
+            current_text = current_text.strip()
             # manage current entry data getUp
             #current_number = float(current_text)
             
             if current_text.isdigit() or self.is_float(current_text) and len(current_text) !=0:
                 current_number = float(current_text)
+            elif self.has_alphabets_and_numbers(current_text) or current_text.isalpha():
+                self.ui.standard_calc_entry.clear()
+                current_number = 0
             else:
                 current_number = 0
             
@@ -570,25 +610,6 @@ class MainController(QWidget):
                 
             elif button_value == 14:
                 self._used_operator = "="
-                try:
-                    
-                    # first check the current text entered
-                    if current_text.isalpha():
-                        self.ui.standard_calc_entry.setText("0")
-                        self.ui.standard_temp_label.setText("")
-                        current_number = 0
-                    elif current_text == "":
-                        self.ui.standard_calc_entry.setText("0")
-                        self.ui.standard_temp_label.setText("")
-                        current_number = 0
-                    elif current_text == "0" or current_text == "0.0":
-                        self.ui.standard_calc_entry.setText("0")
-                        self.ui.standard_temp_label.setText("")
-                        current_number = 0
-                except ValueError:
-                    self.ui.standard_calc_entry.setText("0")
-                    self.ui.standard_temp_label.setText("")
-                    current_number = 0
                 
             # manage settingUp of numbers 
             # place the preview current number in the first_number or second_number list
@@ -599,20 +620,16 @@ class MainController(QWidget):
                 """ manage action for the % button """
                 
                 # get the current value on the input field
-                current_text = self.ui.standard_calc_entry.text()
+                #current_text = self.ui.standard_calc_entry.text()
                 
                 if current_text.isalpha():
                     self.ui.standard_calc_entry.setText("Invalid Operation")
                 else:
+                    # set the percent sign on the entry after the current number
                     current_number = float(current_text)
+                    self.setEnteredNumber(number=current_number,operator="%")
                     
-                    prcnt_number = current_number/100
-                    prcnt_number = round(prcnt_number, 4)
                     
-                    # set the new calculated value to the entry
-                    new_text = f"{prcnt_number}"
-                    
-                    self.ui.standard_calc_entry.setText(new_text)
                 pass
                 
             elif button_value == 16:
@@ -773,7 +790,7 @@ class MainController(QWidget):
             self.completEntryByBtn(button=16)
             
         elif event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter or event.key() == Qt.Key.Key_Equal:
-            print("equal action")
+            
             self.completEntryByBtn(button=14)
             #self.ui.standard_calc_entry.setText(f"{_entry}9")
             
